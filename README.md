@@ -1,4 +1,4 @@
-TaobaoTryData
+TaobaoTryDataAnalyzer
 =============
 
-Get the Taobao's Try data
+Get the Taobao-Try's data
