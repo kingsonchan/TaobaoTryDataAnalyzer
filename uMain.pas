@@ -73,10 +73,22 @@ type
     seFreePriceStart: TSpinEdit;
     seFreePriceEnd: TSpinEdit;
     lbl3: TLabel;
-    SpinEdit1: TSpinEdit;
-    SpinEdit2: TSpinEdit;
-    Label1: TLabel;
     Label2: TLabel;
+    lbl4: TLabel;
+    edtFreeName: TEdit;
+    edtrequestRate: TEdit;
+    cbbRequestType: TComboBox;
+    Panel1: TPanel;
+    Label1: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
+    Label6: TLabel;
+    btnPayFilter: TButton;
+    Button2: TButton;
+    cbbPayStatus: TComboBox;
+    sePriceStart: TSpinEdit;
+    sePriceEnd: TSpinEdit;
+    edtPayTitle: TEdit;
     procedure btnFreeClick(Sender: TObject);
     procedure DBGridEh1TitleBtnClick(Sender: TObject; ACol: Integer;
       Column: TColumnEh);
@@ -86,6 +98,10 @@ type
     procedure DBGridEh1DblClick(Sender: TObject);
     procedure DBGridEh1CellClick(Column: TColumnEh);
     procedure btnStopClick(Sender: TObject);
+    procedure btnFreeFilterClick(Sender: TObject);
+    procedure btnFreeClearFilterClick(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
+    procedure btnPayFilterClick(Sender: TObject);
   private
     { Private declarations }
     canBreak: Boolean;
@@ -186,6 +202,11 @@ begin
   dlgSave.DefaultExt := dlgOpen.DefaultExt;
 end;
 
+procedure TfrmMain.btnFreeClearFilterClick(Sender: TObject);
+begin
+  mtData.Filtered := False;
+end;
+
 procedure TfrmMain.btnFreeClick(Sender: TObject);
 begin
   case Self.pgc1.ActivePageIndex of
@@ -284,6 +305,37 @@ begin
   end;
 end;
 
+procedure TfrmMain.btnFreeFilterClick(Sender: TObject);
+var
+  sFilter: string;
+  requestRate: Double;
+begin
+  sFilter := '1=1';
+  if cbbStatus.Text <> '' then
+    sFilter := sFilter + ' and statusStr = ''' + cbbStatus.Text + '''';
+  if edtFreeName.Text <> '' then
+    sFilter := sFilter + ' and title like ''%' + edtFreeName.Text + '%''';
+  if seFreePriceEnd.Value > 0 then
+    sFilter := sFilter + Format(' and currentPrice >= %d and currentPrice <= %d', [seFreePriceStart.Value, seFreePriceEnd.Value]);
+
+  if not TryStrToFloat(edtrequestRate.Text, requestRate) then
+    Application.MessageBox('ÉêÇë±ÈÀýÇëÊäÈëÊýÖµ¡£', '´íÎó', MB_OK + MB_ICONSTOP);
+
+  if requestRate > 0 then
+  begin
+    case cbbRequestType.ItemIndex  of
+      0: sFilter := sFilter + Format(' and requestRate >= %f', [requestRate]);
+      1: sFilter := sFilter + Format(' and requestRate <= %f', [requestRate]);
+    end;
+  end;
+
+  if sFilter <> '1=1' then
+  begin
+    mtData.Filter := sFilter;
+    mtData.Filtered := True;
+  end;
+end;
+
 procedure TfrmMain.btnLoadDatasetClick(Sender: TObject);
 begin
   case Self.pgc1.ActivePageIndex of
@@ -303,6 +355,30 @@ end;
 procedure TfrmMain.btnStopClick(Sender: TObject);
 begin
   canBreak := True;
+end;
+
+procedure TfrmMain.btnPayFilterClick(Sender: TObject);
+var
+  sFilter: string;
+begin
+  sFilter := '1=1';
+  if cbbPayStatus.Text <> '' then
+    sFilter := sFilter + ' and statusStr = ''' + cbbPayStatus.Text + '''';
+  if edtPayTitle.Text <> '' then
+    sFilter := sFilter + ' and title like ''%' + edtPayTitle.Text + '%''';
+  if sePriceEnd.Value > 0 then
+    sFilter := sFilter + Format(' and currentPrice >= %d and currentPrice <= %d', [sePriceStart.Value, sePriceEnd.Value]);
+
+  if sFilter <> '1=1' then
+  begin
+    mtPay.Filter := sFilter;
+    mtPay.Filtered := True;
+  end;
+end;
+
+procedure TfrmMain.Button2Click(Sender: TObject);
+begin
+  mtPay.Filtered := False;
 end;
 
 procedure TfrmMain.DBGridEh1CellClick(Column: TColumnEh);
@@ -345,9 +421,8 @@ end;
 
 procedure TfrmMain.FormCreate(Sender: TObject);
 begin
-  {adsData.CreateDataSet;
-  adsData.LoadFromFile('c:\adsData.txt');
-  mtData.Active := True;   }
+  if pgc1.PageCount > 0 then
+    pgc1.TabIndex := 0;
 end;
 
 procedure TfrmMain.LoadDataSet(DataSet: TMemTableEh; Atype: TryType);
