@@ -19,13 +19,11 @@ object frmMain: TfrmMain
     Top = 57
     Width = 891
     Height = 416
-    ActivePage = tsFree
+    ActivePage = tsCharge
     Align = alClient
     TabOrder = 0
-    ExplicitWidth = 858
     object tsFree: TTabSheet
       Caption = #20813#36153#35797#29992
-      ExplicitWidth = 850
       object DBGridEh1: TDBGridEh
         Left = 0
         Top = 65
@@ -173,11 +171,9 @@ object frmMain: TfrmMain
         Height = 65
         Align = alTop
         TabOrder = 1
-        Visible = False
-        ExplicitWidth = 850
         object lbl1: TLabel
           Left = 14
-          Top = 16
+          Top = 8
           Width = 36
           Height = 13
           Caption = #29366#24577#65306
@@ -196,19 +192,19 @@ object frmMain: TfrmMain
           Height = 13
           Caption = #33267
         end
-        object Label1: TLabel
-          Left = 367
-          Top = 36
-          Width = 12
-          Height = 13
-          Caption = #33267
-        end
         object Label2: TLabel
           Left = 216
           Top = 36
           Width = 60
           Height = 13
           Caption = #30003#35831#27604#20363#65306
+        end
+        object lbl4: TLabel
+          Left = 16
+          Top = 40
+          Width = 36
+          Height = 13
+          Caption = #21517#31216#65306
         end
         object btnFreeFilter: TButton
           Left = 688
@@ -217,6 +213,7 @@ object frmMain: TfrmMain
           Height = 25
           Caption = #36807#28388
           TabOrder = 0
+          OnClick = btnFreeFilterClick
         end
         object btnFreeClearFilter: TButton
           Left = 800
@@ -225,12 +222,14 @@ object frmMain: TfrmMain
           Height = 25
           Caption = #20840#37096
           TabOrder = 1
+          OnClick = btnFreeClearFilterClick
         end
         object cbbStatus: TComboBox
           Left = 56
-          Top = 16
+          Top = 4
           Width = 145
           Height = 21
+          Style = csDropDownList
           ItemIndex = 0
           TabOrder = 2
           Items.Strings = (
@@ -258,37 +257,44 @@ object frmMain: TfrmMain
           TabOrder = 4
           Value = 0
         end
-        object SpinEdit1: TSpinEdit
+        object edtFreeName: TEdit
+          Left = 56
+          Top = 38
+          Width = 145
+          Height = 21
+          TabOrder = 5
+        end
+        object edtrequestRate: TEdit
+          Left = 367
+          Top = 32
+          Width = 79
+          Height = 21
+          TabOrder = 6
+          Text = '0.000'
+        end
+        object cbbRequestType: TComboBox
           Left = 282
           Top = 32
-          Width = 79
-          Height = 22
-          MaxValue = 0
-          MinValue = 0
-          TabOrder = 5
-          Value = 0
-        end
-        object SpinEdit2: TSpinEdit
-          Left = 409
-          Top = 32
-          Width = 79
-          Height = 22
-          MaxValue = 0
-          MinValue = 0
-          TabOrder = 6
-          Value = 0
+          Width = 60
+          Height = 21
+          Style = csDropDownList
+          ItemIndex = 0
+          TabOrder = 7
+          Text = #22823#20110
+          Items.Strings = (
+            #22823#20110
+            #23567#20110)
         end
       end
     end
     object tsCharge: TTabSheet
       Caption = #20184#36153#35797#29992
       ImageIndex = 1
-      ExplicitWidth = 850
       object DBGridEh2: TDBGridEh
         Left = 0
-        Top = 0
+        Top = 65
         Width = 883
-        Height = 388
+        Height = 323
         Align = alClient
         DataSource = dsPay
         DynProps = <>
@@ -415,6 +421,102 @@ object frmMain: TfrmMain
         object RowDetailData: TRowDetailPanelControlEh
         end
       end
+      object Panel1: TPanel
+        Left = 0
+        Top = 0
+        Width = 883
+        Height = 65
+        Align = alTop
+        TabOrder = 1
+        ExplicitWidth = 64
+        object Label1: TLabel
+          Left = 14
+          Top = 8
+          Width = 36
+          Height = 13
+          Caption = #29366#24577#65306
+        end
+        object Label3: TLabel
+          Left = 240
+          Top = 8
+          Width = 36
+          Height = 13
+          Caption = #21407#20215#65306
+        end
+        object Label4: TLabel
+          Left = 367
+          Top = 8
+          Width = 12
+          Height = 13
+          Caption = #33267
+        end
+        object Label6: TLabel
+          Left = 16
+          Top = 40
+          Width = 36
+          Height = 13
+          Caption = #21517#31216#65306
+        end
+        object btnPayFilter: TButton
+          Left = 688
+          Top = 16
+          Width = 75
+          Height = 25
+          Caption = #36807#28388
+          TabOrder = 0
+          OnClick = btnPayFilterClick
+        end
+        object Button2: TButton
+          Left = 800
+          Top = 16
+          Width = 75
+          Height = 25
+          Caption = #20840#37096
+          TabOrder = 1
+          OnClick = Button2Click
+        end
+        object cbbPayStatus: TComboBox
+          Left = 56
+          Top = 4
+          Width = 145
+          Height = 21
+          Style = csDropDownList
+          ItemIndex = 0
+          TabOrder = 2
+          Items.Strings = (
+            ''
+            #20184#37038#39046#21462
+            #24320#35797#25552#37266
+            #24050#32467#26463)
+        end
+        object sePriceStart: TSpinEdit
+          Left = 282
+          Top = 4
+          Width = 79
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 3
+          Value = 0
+        end
+        object sePriceEnd: TSpinEdit
+          Left = 409
+          Top = 4
+          Width = 79
+          Height = 22
+          MaxValue = 0
+          MinValue = 0
+          TabOrder = 4
+          Value = 0
+        end
+        object edtPayTitle: TEdit
+          Left = 56
+          Top = 38
+          Width = 145
+          Height = 21
+          TabOrder = 5
+        end
+      end
     end
   end
   object RzStatusBar1: TRzStatusBar
@@ -427,7 +529,6 @@ object frmMain: TfrmMain
     BorderSides = [sdLeft, sdTop, sdRight, sdBottom]
     BorderWidth = 0
     TabOrder = 1
-    ExplicitWidth = 858
     object pnlStatus: TRzStatusPane
       Left = 0
       Top = 0
@@ -446,7 +547,6 @@ object frmMain: TfrmMain
     Align = alTop
     BorderOuter = fsNone
     TabOrder = 2
-    ExplicitWidth = 858
     object btnFree: TButton
       Left = 18
       Top = 17
