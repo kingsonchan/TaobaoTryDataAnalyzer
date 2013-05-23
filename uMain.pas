@@ -1,3 +1,11 @@
+{*******************************************************}
+{                                                       }
+{       Taobao Try Data Analyzer                        }
+{                                                       }
+{       版权所有 (C) 2013 CycloneStudio                 }
+{                                                       }
+{*******************************************************}
+
 unit uMain;
 
 interface
@@ -60,7 +68,7 @@ type
     rbAll: TRadioButton;
     chkBreak: TCheckBox;
     rbPage: TRadioButton;
-    edtPage: TEdit;
+    edtPageEnd: TEdit;
     btnSaveDataset: TButton;
     btnLoadDataset: TButton;
     btnStop: TButton;
@@ -89,6 +97,13 @@ type
     sePriceStart: TSpinEdit;
     sePriceEnd: TSpinEdit;
     edtPayTitle: TEdit;
+    lbl5: TLabel;
+    edtPageStart: TEdit;
+    chkClearData: TCheckBox;
+    btnShowAnswer: TButton;
+    chkShowAnswer: TCheckBox;
+    cbbEqualType: TComboBox;
+    chkQuantity: TCheckBox;
     procedure btnFreeClick(Sender: TObject);
     procedure DBGridEh1TitleBtnClick(Sender: TObject; ACol: Integer;
       Column: TColumnEh);
@@ -102,6 +117,9 @@ type
     procedure btnFreeClearFilterClick(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure btnPayFilterClick(Sender: TObject);
+    procedure chkShowAnswerClick(Sender: TObject);
+    procedure pnlTopClick(Sender: TObject);
+    procedure btnShowAnswerClick(Sender: TObject);
   private
     { Private declarations }
     canBreak: Boolean;
@@ -122,7 +140,8 @@ var
 implementation
 
 uses
-  HtmlUtils, Winapi.ShellAPI, uShowPic, FileUtils;
+  HtmlUtils, Winapi.ShellAPI, uShowPic, FileUtils, uAnswer,
+  System.RegularExpressions;
 
 const
   tryUrlPage = 'http://try.taobao.com/item/newItemList.htm?tab=%d&page=%d';
@@ -221,9 +240,16 @@ var
   jaData: TJSONArray;
   jo: TJSONObject;
 begin
-  DataSet.Close;
-  DataSet.CreateDataSet;
-  currentPage := 1;
+  if chkClearData.Checked or not DataSet.Active then
+  begin
+    DataSet.Close;
+    DataSet.CreateDataSet;
+  end;
+
+  if rbPage.Checked then
+    currentPage := StrToInt(edtPageStart.Text)
+  else
+    currentPage := 1;
   canBreak := False;
   TotalPage := 0;
   pnlTop.Enabled := False;
@@ -296,7 +322,7 @@ begin
       Inc(currentPage);
       if canBreak then
         Break;
-    until (currentPage >= TotalPage) or (rbPage.Checked and (currentPage > StrToInt(edtPage.Text)));
+    until (currentPage >= TotalPage) or (rbPage.Checked and (currentPage > StrToInt(edtPageEnd.Text)));
 
     pnlStatus.Caption := Format('试用数据读取完毕。共读取%d页。（双击打开链接）', [currentPage -  1]);
   finally
@@ -352,6 +378,40 @@ begin
   end;
 end;
 
+procedure TfrmMain.btnShowAnswerClick(Sender: TObject);
+var
+  s: string;
+  match: TMatch;
+  frm: TfrmAnswer;
+const
+  perDetail = '<a href="(.[^"<>]*)".[^<>]*>找答案</a>';
+  perAnswerList = '<div class="attributes-list" id="J_AttrList">((?!</?div[^>]*>).|\n)*(((?''TAG''<div[^>]*>)((?!</?div[^>]*>).|\n)*)+((?''-TAG''</div>)((?!</?div[^>]*>).|\n)*)+)*(?(TAG)(?!))</div>';
+  //perAnswers = '<li.[^>]*>(.[^</>:]*):(.[^</>]*)</li>';
+  perAnswers = '<li.[^</>:]*title=".[^"]*">(.[^</>:]*):(.[^</>]*)</li>';
+begin
+  s := mtData.FieldByName('itemDetailUrl').AsString;
+  try
+    s := IdHTTP.Get(s);
+    match := TRegEx.Match(s, perDetail, [roSingleLine]);
+    if match.Success then
+    begin
+      s := match.Groups.Item[1].Value;
+      s := IdHTTP.Get(s);
+      match := TRegEx.Match(s, perAnswers, [roSingleLine]);
+      frm := TfrmAnswer.Create(Self);
+      while match.Success do
+      begin
+        frm.AddFrame(match.Groups.Item[1].Value, HtmlCode2String(match.Groups.Item[2].Value).Trim);
+
+        match := match.NextMatch;
+      end;
+      frm.Show;
+    end;
+  finally
+
+  end;
+end;
+
 procedure TfrmMain.btnStopClick(Sender: TObject);
 begin
   canBreak := True;
@@ -363,11 +423,18 @@ var
 begin
   sFilter := '1=1';
   if cbbPayStatus.Text <> '' then
-    sFilter := sFilter + ' and statusStr = ''' + cbbPayStatus.Text + '''';
+  begin
+    case cbbEqualType.ItemIndex of
+      0: sFilter := sFilter + ' and statusStr = ''' + cbbPayStatus.Text + '''';
+      1: sFilter := sFilter + ' and statusStr <> ''' + cbbPayStatus.Text + '''';
+    end;
+  end;
   if edtPayTitle.Text <> '' then
     sFilter := sFilter + ' and title like ''%' + edtPayTitle.Text + '%''';
   if sePriceEnd.Value > 0 then
     sFilter := sFilter + Format(' and currentPrice >= %d and currentPrice <= %d', [sePriceStart.Value, sePriceEnd.Value]);
+  if chkQuantity.Checked then
+    sFilter := sFilter + ' and Quantity > 0';
 
   if sFilter <> '1=1' then
   begin
@@ -379,6 +446,15 @@ end;
 procedure TfrmMain.Button2Click(Sender: TObject);
 begin
   mtPay.Filtered := False;
+end;
+
+procedure TfrmMain.chkShowAnswerClick(Sender: TObject);
+begin
+  with TfrmAnswer.Create(Self) do
+  begin
+    ShowModal;
+    Free;
+  end;
 end;
 
 procedure TfrmMain.DBGridEh1CellClick(Column: TColumnEh);
@@ -395,8 +471,49 @@ begin
   begin
     s := TDBGridEh(Sender).DataSource.DataSet.FieldByName('itemDetailUrl').AsString;
     if not s.Trim.IsEmpty then
+    begin
       ShellExecute(0, 'open', PWideChar(s), nil, nil, SW_SHOWNORMAL);
+      if chkShowAnswer.Checked and (pgc1.ActivePage = tsFree) then
+      begin
+        btnShowAnswer.Click;
+      end;
+    end;
   end;
+end;
+
+procedure TfrmMain.pnlTopClick(Sender: TObject);
+
+var
+  s: string;
+  match: TMatch;
+  frm: TfrmAnswer;
+  sl: TStringList;
+const
+  perDetail = '<a href="(.[^"<>]*)".[^<>]*>找答案</a>';
+  perAnswerList = '<div class="attributes-list" id="J_AttrList">((?!</?div[^>]*>).|\n)*(((?''TAG''<div[^>]*>)((?!</?div[^>]*>).|\n)*)+((?''-TAG''</div>)((?!</?div[^>]*>).|\n)*)+)*(?(TAG)(?!))</div>';
+  //perAnswers = '<li.[^>]*>(.[^</>:]*):(.[^</>]*)</li>';
+  perAnswers = '<li title=".[^"]*">(.[^</>:]*):(.[^</>]*)</li>';
+begin
+  sl := TStringList.Create;
+  sl.LoadFromFile('C:\Users\Administrator\Desktop\试用问题页.htm');
+  s := sl.Text;
+  match := TRegEx.Match(s, perDetail, [roSingleLine]);
+  if match.Success then
+  begin
+    s := match.Groups.Item[1].Value;
+    sl.LoadFromFile('C:\Users\Administrator\Desktop\答案页.htm');
+    s := sl.Text;
+    match := TRegEx.Match(s, perAnswers, [roSingleLine]);
+    frm := TfrmAnswer.Create(Self);
+    while match.Success do
+    begin
+      frm.AddFrame(match.Groups.Item[1].Value, HtmlCode2String(match.Groups.Item[2].Value).Trim);
+
+      match := match.NextMatch;
+    end;
+    frm.Show;
+  end;
+  sl.Free;
 end;
 
 procedure TfrmMain.DBGridEh1TitleBtnClick(Sender: TObject; ACol: Integer;
@@ -423,6 +540,9 @@ procedure TfrmMain.FormCreate(Sender: TObject);
 begin
   if pgc1.PageCount > 0 then
     pgc1.TabIndex := 0;
+
+  IdHTTP.ProtocolVersion := pv1_1;
+  IdHTTP.Request.UserAgent := 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 2.0.50727; .NET CLR 3.0.04506.648; .NET CLR 3.5.21022)';
 end;
 
 procedure TfrmMain.LoadDataSet(DataSet: TMemTableEh; Atype: TryType);

@@ -1,6 +1,6 @@
 object frmMain: TfrmMain
-  Left = 0
-  Top = 0
+  Left = 257
+  Top = 113
   Caption = #28120#23453#35797#29992#25968#25454#32479#35745'      QQ:147629800'
   ClientHeight = 492
   ClientWidth = 891
@@ -11,6 +11,7 @@ object frmMain: TfrmMain
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
+  Position = poDesigned
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
@@ -19,7 +20,7 @@ object frmMain: TfrmMain
     Top = 57
     Width = 891
     Height = 416
-    ActivePage = tsCharge
+    ActivePage = tsFree
     Align = alClient
     TabOrder = 0
     object tsFree: TTabSheet
@@ -285,6 +286,26 @@ object frmMain: TfrmMain
             #22823#20110
             #23567#20110)
         end
+        object btnShowAnswer: TButton
+          Left = 576
+          Top = 16
+          Width = 75
+          Height = 25
+          Caption = #26174#31034#31572#26696
+          TabOrder = 8
+          OnClick = btnShowAnswerClick
+        end
+        object chkShowAnswer: TCheckBox
+          Left = 494
+          Top = 20
+          Width = 73
+          Height = 17
+          Caption = #26174#31034#31572#26696
+          Checked = True
+          State = cbChecked
+          TabOrder = 9
+          OnClick = chkShowAnswerClick
+        end
       end
     end
     object tsCharge: TTabSheet
@@ -428,7 +449,6 @@ object frmMain: TfrmMain
         Height = 65
         Align = alTop
         TabOrder = 1
-        ExplicitWidth = 64
         object Label1: TLabel
           Left = 14
           Top = 8
@@ -476,9 +496,9 @@ object frmMain: TfrmMain
           OnClick = Button2Click
         end
         object cbbPayStatus: TComboBox
-          Left = 56
+          Left = 121
           Top = 4
-          Width = 145
+          Width = 80
           Height = 21
           Style = csDropDownList
           ItemIndex = 0
@@ -516,6 +536,29 @@ object frmMain: TfrmMain
           Height = 21
           TabOrder = 5
         end
+        object cbbEqualType: TComboBox
+          Left = 56
+          Top = 4
+          Width = 65
+          Height = 21
+          Style = csDropDownList
+          ItemIndex = 1
+          TabOrder = 6
+          Text = #19981#31561#20110
+          Items.Strings = (
+            #31561#20110
+            #19981#31561#20110)
+        end
+        object chkQuantity: TCheckBox
+          Left = 240
+          Top = 39
+          Width = 97
+          Height = 17
+          Caption = #21097#20313#25968#37327#22823#20110'0'
+          Checked = True
+          State = cbChecked
+          TabOrder = 7
+        end
       end
     end
   end
@@ -547,6 +590,14 @@ object frmMain: TfrmMain
     Align = alTop
     BorderOuter = fsNone
     TabOrder = 2
+    OnClick = pnlTopClick
+    object lbl5: TLabel
+      Left = 468
+      Top = 23
+      Width = 12
+      Height = 13
+      Caption = #33267
+    end
     object btnFree: TButton
       Left = 18
       Top = 17
@@ -557,7 +608,7 @@ object frmMain: TfrmMain
       OnClick = btnFreeClick
     end
     object rbAll: TRadioButton
-      Left = 128
+      Left = 104
       Top = 21
       Width = 81
       Height = 17
@@ -567,7 +618,7 @@ object frmMain: TfrmMain
       TabStop = True
     end
     object chkBreak: TCheckBox
-      Left = 209
+      Left = 185
       Top = 21
       Width = 137
       Height = 17
@@ -577,15 +628,15 @@ object frmMain: TfrmMain
       TabOrder = 2
     end
     object rbPage: TRadioButton
-      Left = 346
+      Left = 322
       Top = 21
       Width = 89
       Height = 17
-      Caption = #26816#26597#21040#39029#65306
+      Caption = #26816#26597#39029#33258#65306
       TabOrder = 3
     end
-    object edtPage: TEdit
-      Left = 435
+    object edtPageEnd: TEdit
+      Left = 480
       Top = 19
       Width = 57
       Height = 21
@@ -593,8 +644,8 @@ object frmMain: TfrmMain
       Text = '30'
     end
     object btnSaveDataset: TButton
-      Left = 664
-      Top = 17
+      Left = 804
+      Top = 1
       Width = 75
       Height = 25
       Caption = #20445#23384#21040#25991#20214
@@ -602,17 +653,35 @@ object frmMain: TfrmMain
       OnClick = btnSaveDatasetClick
     end
     object btnLoadDataset: TButton
-      Left = 766
-      Top = 17
+      Left = 804
+      Top = 32
       Width = 75
       Height = 25
       Caption = #20174#25991#20214#21152#36733
       TabOrder = 6
       OnClick = btnLoadDatasetClick
     end
+    object edtPageStart: TEdit
+      Left = 411
+      Top = 19
+      Width = 57
+      Height = 21
+      TabOrder = 7
+      Text = '1'
+    end
+    object chkClearData: TCheckBox
+      Left = 537
+      Top = 21
+      Width = 97
+      Height = 17
+      Caption = #28165#31354#25968#25454
+      Checked = True
+      State = cbChecked
+      TabOrder = 8
+    end
   end
   object btnStop: TButton
-    Left = 528
+    Left = 623
     Top = 17
     Width = 75
     Height = 25
@@ -623,6 +692,7 @@ object frmMain: TfrmMain
   end
   object IdHTTP: TIdHTTP
     AllowCookies = True
+    HandleRedirects = True
     ProxyParams.BasicAuthentication = False
     ProxyParams.ProxyPort = 0
     Request.ContentLength = -1

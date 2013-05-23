@@ -93,6 +93,14 @@
             <Form>frmPic</Form>
             <FormType>dfm</FormType>
         </DCCReference>
+        <DCCReference Include="fTextButton.pas">
+            <Form>FrameTextButton</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
+        <DCCReference Include="uAnswer.pas">
+            <Form>frmAnswer</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
